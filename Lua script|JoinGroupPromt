@@ -1,0 +1,19 @@
+local GroupService = game:GetService("GroupService")
+local Players = game:GetService("Players")
+
+local GROUP_ID = 000000 -- put your group ID here
+local PROMPT_INTERVAL = 3600
+
+local player = Players.LocalPlayer
+
+task.spawn(function()
+    while task.wait(PROMPT_INTERVAL) do
+        if player:IsInGroup(GROUP_ID) then
+            break
+        end
+
+        pcall(function()
+            GroupService:PromptJoinAsync(GROUP_ID)
+        end)
+    end
+end)
