@@ -1,0 +1,39 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local IMPACT_THRESHOLD = -55
+local DAMAGE_PER_SPEED = 1
+local CHECK_RATE = 0.15
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(char)
+        local humanoid = char:WaitForChild("Humanoid")
+        local root = char:WaitForChild("HumanoidRootPart")
+
+        local lowestVel = 0
+        local falling = false
+        local lastCheck = 0
+
+        RunService.Stepped:Connect(function(_, dt)
+            lastCheck += dt
+            if lastCheck < CHECK_RATE then return end
+            lastCheck = 0
+
+            local yVel = root.AssemblyLinearVelocity.Y
+
+            if yVel < -5 and humanoid.FloorMaterial == Enum.Material.Air then
+                falling = true
+                if yVel < lowestVel then lowestVel = yVel end
+            end
+
+            if falling and humanoid.FloorMaterial ~= Enum.Material.Air then
+                if lowestVel < IMPACT_THRESHOLD then
+                    local impact = math.abs(lowestVel) - math.abs(IMPACT_THRESHOLD)
+                    humanoid:TakeDamage(impact * DAMAGE_PER_SPEED)
+                end
+                falling = false
+                lowestVel = 0
+            end
+        end)
+    end)
+end)
